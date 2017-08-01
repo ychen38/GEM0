@@ -389,7 +389,7 @@
 	    do i=0,im-1
 	       tmpx(i) = aph(i) 
 	    enddo
-	    call ccfft('x',1,imx,1.d0,tmpx,tmpx,coefx,workx,0)
+	    call ccfft('x',1,imx,1.d0,tmpx,coefx,workx,0)
 	    write(*,98)n,aimag(tmpx(0)),aimag(tmpx(1)),aimag(tmpx(2)), &
 	    aimag(tmpx(3)),aimag(tmpx(4))
 

@@ -1766,14 +1766,14 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
                enddo
 
 !     FT in x....
-               call ccfft('x',1,imx,1.d0,tmpx,tmpx,coefx,workx,0)
+               call ccfft('x',1,imx,1.d0,tmpx,coefx,workx,0)
                ii=lmode(mode) !+1
                if(lmode(mode).lt.0) write(*,*) 'lmode < 0, error'
                tmpy(j)=tmpx(ii)/float(im)
             enddo
 
 !     FT in y....
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             jj=mmode(mode)  !+1
             if(mmode(mode).lt.0) write(*,*) 'mmode < 0, error'
             modebuf=tmpy(jj)/float(jm)
@@ -2259,7 +2259,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -2642,7 +2642,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -2668,7 +2668,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
             do j = 0,jmx-1
                tmpy(j) = vb(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                vb(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -2872,7 +2872,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
       INTEGER :: n,i,j,k
       COMPLEX(8) :: tmp3d(0:imx-1,0:jmx-1,0:1-1)
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
 !      if(n.eq.0) return
 
@@ -2889,7 +2889,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
 !            do i = 0,imx-1
 !               tmpx(i) = tmp3d(i,j,k)
 !            end do
-!            call ccfft('x',1,imx,1.d0,tmpx,tmpx,coefx,workx,0)
+!            call ccfft('x',1,imx,1.d0,tmpx,coefx,workx,0)
 !            do i = 0,imx-1
 !               tmp3d(i,j,k) = tmpx(i)
 !            end do
@@ -2898,7 +2898,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
             do j = 0,jmx-1
                tmpy(j) = tmp3d(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                tmp3d(i,j,k) = tmpy(j)
             end do
@@ -2933,7 +2933,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
          end if
 
          if(GCLR.eq.master) then
-            call ccfft('z',1,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+            call ccfft('z',1,kmx,1.d0,tmpz,coefz,workz,0)
          end if
 
          call MPI_BCAST(tmpz,kmx,MPI_DOUBLE_COMPLEX,master, &
@@ -2967,7 +2967,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
       INTEGER :: n,i,j,k,m
       COMPLEX(8) :: tmp3d(0:imx,0:jmx,0:1)
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
 !      if(n.eq.0) return
 
@@ -2985,7 +2985,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
             do j = 0,jmx-1
                tmpy(j) = tmp3d(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                tmp3d(i,j,k) = tmpy(j)
             end do
@@ -3033,7 +3033,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
       INTEGER :: n,i,j,k,m
       COMPLEX(8) :: tmp3d(0:imx,0:jmx,0:1)
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
 !      if(n.eq.0) return
 
@@ -3051,7 +3051,7 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
             do j = 0,jmx-1
                tmpy(j) = tmp3d(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                tmp3d(i,j,k) = tmpy(j)
             end do
@@ -3719,10 +3719,10 @@ if(idg.eq.1)write(*,*)'pass electron grid1'
          if( cut.eq.0.) cut=1.
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 
-         call ccfft('x',0,imx,0.d0,tmpx,tmpx,coefx,workx,0)
-         call ccfft('y',0,jmx,0.d0,tmpy,tmpy,coefy,worky,0)
-         call ccfft('z',0,kmx,0.d0,tmpz,tmpz,coefz,workz,0)
-         call dsinf(1,x,1,0,y,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+         call ccfft('x',0,imx,0.d0,tmpx,coefx,workx,0)
+         call ccfft('y',0,jmx,0.d0,tmpy,coefy,worky,0)
+         call ccfft('z',0,kmx,0.d0,tmpz,coefz,workz,0)
+         call dsinf(1,x,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
          
          ncurr = 1
          call blendf
@@ -4050,7 +4050,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',-1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',-1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)   !rho(ky,x)
             end do
@@ -4088,10 +4088,8 @@ end subroutine reporter
          do j = 0,jmx-1
             gr(:) = real(temp3dxy(:,j,k))
             gi(:) = aimag(temp3dxy(:,j,k))
-!       call dsinf(0,gr(0),1,0,gr(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)  
-       call dsinf(0,gr,1,0,gr,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
-!       call dsinf(0,gi(0),1,0,gi(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)  
-       call dsinf(0,gi,1,0,gi,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gr,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gi,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
             if(j==0.and.ism==0)then
                u1(:) = cmplx(gr(:),gi(:))
                call gam(u1(:),v(:),isdamp)
@@ -4100,10 +4098,8 @@ end subroutine reporter
             end if
             gr(:) = gr(:)*filterx(:,j)
             gi(:) = gi(:)*filterx(:,j)
-!       call dsinf(0,gr(0),1,0,gr(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)  
-       call dsinf(0,gr,1,0,gr,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
-!       call dsinf(0,gi(0),1,0,gi(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)  
-       call dsinf(0,gi,1,0,gi,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gr,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gi,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
             temp3dxy(:,j,k) = cmplx(gr(:),gi(:))
          end do
       end do
@@ -4118,7 +4114,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -4202,7 +4198,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',-1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',-1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)   !rho(ky,x)
             end do
@@ -4213,10 +4209,8 @@ end subroutine reporter
          do j = 0,jmx-1
             gr(:) = real(temp3dxy(:,j,k))
             gi(:) = aimag(temp3dxy(:,j,k))
-!       call dsinf(0,gr(0),1,0,gr(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)
-       call dsinf(0,gr,1,0,gr,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
-!       call dsinf(0,gi(0),1,0,gi(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)
-       call dsinf(0,gi,1,0,gi,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gr,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gi,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
        if(j==0)then
           u1(:) = cmplx(gr(:),gi(:))
           call gam1(u1(:),v(:))
@@ -4225,10 +4219,8 @@ end subroutine reporter
        end if
        gr(:) = gr(:)*filterx(:,j)
        gi(:) = gi(:)*filterx(:,j)
-!       call dsinf(0,gr(0),1,0,gr(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)
-       call dsinf(0,gr,1,0,gr,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
-!       call dsinf(0,gi(0),1,0,gi(0),1,0,imx*2,1, 1.d0,aux1,50000,aux2,20000)
-       call dsinf(0,gi,1,0,gi,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gr,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
+       call dsinf(0,gi,1,0,1,0,imx*2,1,1.d0,aux1,50000,aux2,20000)
             temp3dxy(:,j,k) = cmplx(gr(:),gi(:))
          end do
       end do
@@ -4240,7 +4232,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -4347,7 +4339,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3d(i,j,k)
             end do
-            call ccfft('y',-1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',-1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3d(i,j,k) = tmpy(j)
             end do
@@ -6975,7 +6967,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -8491,7 +8483,7 @@ end subroutine reporter
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -8806,7 +8798,7 @@ end subroutine constrdte
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -10496,7 +10488,7 @@ end subroutine constrdte
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -11052,7 +11044,7 @@ end subroutine constrdte
             do j = 0,jmx-1
                tmpy(j) = temp3dxy(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                temp3dxy(i,j,k) = tmpy(j)  ! phi(x,y)
             end do
@@ -11084,7 +11076,7 @@ end subroutine constrdte
       complex(8) :: u(0:imx-1),v(0:imx-1)
       INTEGER :: n,i,j,k,k1,i1,isdamp
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
       do i1 = 0,imx-1
          tmpz(0) = u(i1)
@@ -11102,7 +11094,7 @@ end subroutine constrdte
          end if
 
          if(GCLR.eq.master) then
-            call ccfft('z',1,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+            call ccfft('z',1,kmx,1.d0,tmpz,coefz,workz,0)
          end if
 
          call MPI_BCAST(tmpz,kmx,MPI_DOUBLE_COMPLEX,master, &
@@ -11114,7 +11106,7 @@ end subroutine constrdte
 !            if(k1>1)tmpz(k) = 0.
             tmpz(k) = (1-nugam*dt*isdamp)*tmpz(k)
          end do
-         call ccfft('z',-1,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+         call ccfft('z',-1,kmx,1.d0,tmpz,coefz,workz,0)
          tmpz = tmpz/kmx
 
          v(i1) = tmpz(gclr)
@@ -11132,7 +11124,7 @@ end subroutine constrdte
       complex(8) :: u(0:imx-1),v(0:imx-1)
       INTEGER :: n,i,j,k,k1,i1,isdamp
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
       do i1 = 0,imx-1
          tmpz(0) = u(i1)
@@ -11150,7 +11142,7 @@ end subroutine constrdte
          end if
 
          if(GCLR.eq.master) then
-            call ccfft('z',1,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+            call ccfft('z',1,kmx,1.d0,tmpz,coefz,workz,0)
          end if
 
          call MPI_BCAST(tmpz,kmx,MPI_DOUBLE_COMPLEX,master, &
@@ -11161,7 +11153,7 @@ end subroutine constrdte
             if(k>kmx/2)k1=kmx-k
             if(k1>1)tmpz(k) = 0.
          end do
-         call ccfft('z',-1,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+         call ccfft('z',-1,kmx,1.d0,tmpz,coefz,workz,0)
          tmpz = tmpz/kmx
 
          v(i1) = tmpz(gclr)
@@ -11184,7 +11176,7 @@ end subroutine constrdte
       INTEGER :: n,i,j,k,m
       COMPLEX(8) :: tmp3d(0:imx,0:jmx,0:1),cdum
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
 !      if(n.eq.0) return
 
@@ -11202,7 +11194,7 @@ end subroutine constrdte
             do j = 0,jmx-1
                tmpy(j) = tmp3d(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                tmp3d(i,j,k) = tmpy(j)
             end do
@@ -11244,7 +11236,7 @@ end subroutine constrdte
       INTEGER :: n,i,j,k,m
       COMPLEX(8) :: tmp3d(0:imx,0:jmx,0:1),cdum
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
 !      if(n.eq.0) return
 
@@ -11262,7 +11254,7 @@ end subroutine constrdte
             do j = 0,jmx-1
                tmpy(j) = tmp3d(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                tmp3d(i,j,k) = tmpy(j)
             end do
@@ -11304,7 +11296,7 @@ end subroutine constrdte
       INTEGER :: n,i,j,k,m
       COMPLEX(8) :: tmp3d(0:imx,0:jmx,0:1),cdum
 
-      call ccfft('z',0,kmx,1.d0,tmpz,tmpz,coefz,workz,0)
+      call ccfft('z',0,kmx,1.d0,tmpz,coefz,workz,0)
 
 !      if(n.eq.0) return
 
@@ -11322,7 +11314,7 @@ end subroutine constrdte
             do j = 0,jmx-1
                tmpy(j) = tmp3d(i,j,k)
             end do
-            call ccfft('y',1,jmx,1.d0,tmpy,tmpy,coefy,worky,0)
+            call ccfft('y',1,jmx,1.d0,tmpy,coefy,worky,0)
             do j = 0,jmx-1
                tmp3d(i,j,k) = tmpy(j)
             end do

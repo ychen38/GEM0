@@ -4,13 +4,14 @@ real(8) :: coefxp(20000),coefyp(20000),coefzp(20000)
 real(8) :: coefxn(20000),coefyn(20000),coefzn(20000)
 real(8) :: workxx(20000),workyy(20000),workzz(20000)
 real(8) :: wsave(50000)
+
 contains
 
-subroutine ccfft(c,isign,n,scale,x,y,table,work,isys)
+subroutine ccfft(c,isign,n,scale,x,table,work,isys)
    character :: c
    real(8) :: scale
    integer :: isign,n,isys      
-   complex(8),dimension(0:) :: x,y
+   complex(8),dimension(0:) :: x
    real(8),dimension(:) :: table
    real(8),dimension(:) :: work
 
@@ -69,10 +70,10 @@ subroutine ccfft(c,isign,n,scale,x,y,table,work,isys)
    return
 end subroutine ccfft
 
-subroutine dsinf(init,x,inc1x,inc2x,y,inc1y,inc2y,n,m,scale,aux1,naux1,aux2,naux2)
+subroutine dsinf(init,x,inc1x,inc2x,inc1y,inc2y,n,m,scale,aux1,naux1,aux2,naux2)
    integer :: init,inc1x,inc2x,inc1y,inc2y,n,m,naux1,naux2,n2,i
    real(8) :: scale
-   real(8),dimension(:) :: x,y,aux1,aux2
+   real(8),dimension(:) :: x,aux1,aux2
 
    n2=n/2-1
 !initialize
@@ -92,3 +93,4 @@ subroutine dsinf(init,x,inc1x,inc2x,y,inc1y,inc2y,n,m,scale,aux1,naux1,aux2,naux
 end subroutine dsinf
 
 end module fft_wrapper
+
