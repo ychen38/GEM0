@@ -14,4 +14,11 @@ xpp
 stress
 indicator
 freq
-Makefile
+Direct/dump/
+Direct/matrix/
+Direct/out/
+Hybrid/dump/
+Hybrid/matrix/
+Hybrid/out/
+
+
