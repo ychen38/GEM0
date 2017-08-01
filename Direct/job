@@ -1,0 +1,13 @@
+#!/bin/bash -l
+
+#SBATCH -A mp118
+#SBATCH -p debug
+#SBATCH --qos=normal
+#SBATCH -N 8
+#SBATCH -C haswell
+#SBATCH -t 0:30:00
+#SBATCH -J tmp
+
+cd $SLURM_SUBMIT_DIR
+
+srun -n 256 ./gem >& run.out

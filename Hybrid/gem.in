@@ -1,0 +1,96 @@
+dt'***************************************************************'
+'* input for 3d slab code, comments at bottom                  *'
+'***************************************************************'
+
+'imx   jmx   kmx   mmx    mmxe    nmx   nsmx   modemx  ntube   icrs_sec  ipg  isphi  itrace isft  irlk  qoffset'
+ 512   64    64   200000  400000  100000   4       4    8         0       110     1      0      0     0    0.0
+
+'lxa       lyfra       nrst   eprs    epsnx     epsny     epsnz   epsax  epsay  epsaz'
+ 0.8        4.         100    0.0     0.02       0.0       0.05    0.02    0.     0.1
+
+'dt     nm        nsm    xshape   y6hape   zshape  isham   ishgk  icmprs   iez   isgkm  icncl  ispre  isdte'
+ 5.    11000       1       1.0     1.0     137.44    0       0       1       1      0     1     1       1
+
+'kymode   iput   iget     ision  ish   peritr llk mlk onemd izon  kxz   oml      omu      nom   delom'
+  6        1      1       1      1      0     64  1     0     0     1  0.21e-2   0.5e-2    100   1.e-4
+
+'nplot   xnplt   modem    nzcrt    npzh  nenh   dtref  islow  mynf  frmax  ifskp  jcnt'
+ 100      10       4       6       4     10     2.      1      4    0.001   10    3
+
+'cut    amp(0.01)    tor ishift  fradi  kxcut  kycut   bcut   epspx   epspz'
+ 1.0     1.e-3        1.    0     0.0    1.0    0.8     3000.  0.02   0.1
+
+'br0      lr0        q0      qp(.0625)      width      vpp       vt0    yd0  etaohm'
+ 713.7    0.55       1.4     0.0085       10000000.   0.000      0.    0.00    1e-6
+
+'c1    c2    c3    c4   ifluid  isg    amie    rneu     gamion  gamele  gambm  gamdne  gamphi  gamapa  gamte  nugam'
+ 24.0  0.0   0.0   2.0     1    0.0    1837.    0.e-7    1.e-7   1e-7   1.e-7   1.e-7   1.e-7   1.e-7  1.0e-6   0e-5
+	
+'beta       nonlin   nonline nonlinh ipara iparah  nonlint   iparat  vwidth vwidthe  vcut  isuni idg'
+0.124e-2       0       0        1      0     0       1         1        8.     8.       15.     0    0
+
+'***************species info************************************'
+
+'ion         electron         tets   mims     q   lr'
+33554432     67108864          1.    2.0      1.   4
+
+'            kappan 0.0022      kappat 0.0069     kapt(2)'
+                 0.000          0.000            0.00
+
+'betah     lh   delth    vc      vi     vmin    iflr  iorb  iflrh    iske  ifrzt    idenek  iflut  ieqmo814'
+0.00664    0.2   0.25    7.1     4.      1.      1     1     1        0      0        0      0      1
+
+---------------------------------------------------------------
+comments placed here past reading of input data.
+test input for debugging ion temp. gradient mode run with xgrafix
+"absorbed" adiabatic electrons.
+---------------------------------------------------------------
+     Explaination of variables follows...
+---------------------------------------------------------------
+
+Length in rho_s, time in inverse omega_ci, velocity in c_s.
+
+imx,jmx,kmx are the no. of grid cells in x,y,z
+
+lx,ly,lz are the x,y,z, lengths of the system in rho_s.
+
+twod set to 1 causes averaging charge density in z, two get 
+clean 2d results one needs to comment out particle motion in z,
+in pushers, set twod=0 for 3d runs.
+
+ncar=1 to turn on ncar graphics, 0 to turn off ncar graphics 
+xgplot=1 to turn on xgrafix, 0 to turn off xgrafix
+
+dt,nm,nsm - delta t, no. of time steps, and number of species
+currently code allows two species (ions and electrons).
+
+xshape,yshape,zshape - Fourier filtering, multiply transformed phi
+by exp(- (shape dot k )^2 ).
+
+kymode is the zmode used for poloidal diagnostics
+
+nplot - plot snapshots when n mod nplot = 0, n the time step.
+xnplt - XGrafiX plot snapshots when n mod xnplt =0, n the time step.
+
+modem is the no. of slab modes to be plotted.
+
+contu,pskip - no. of contour lines plotted, plot every pskip particle.
+
+wmax - max. value for freq. spectrum.
+
+imovie - save ncsa hdf movie data when n mod imovie = 0,  
+if no movies are to be made imovie=0.
+
+Species info:
+
+  mm is the no. of particles for this species.
+  
+  tets is T_e/T_s, mims is M_i/M_s
+
+  q is q/e q=1. or -1. at this point.
+
+  lr is the no. of pts. for gyroaveraging.
+
+  kappan = -(grad n_s)/n_s, kappat = -(grad T_s)/T_s 
+
+---------------------------------------------------------------
