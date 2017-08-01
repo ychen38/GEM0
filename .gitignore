@@ -1,0 +1,17 @@
+plot
+plot1
+flux
+*.o
+*.mod
+yyre*
+gem
+*.pro
+*.txt
+mdhis
+mdhisa
+eqdat
+xpp
+stress
+indicator
+freq
+Makefile
