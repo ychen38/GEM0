@@ -1,3 +1,6 @@
+*/sweep
+*/*.out
+*/mxamp
 */plot*
 */flux
 */*.o
