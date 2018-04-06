@@ -1,40 +1,37 @@
-SRCS =	erf.f gem_com.f90 equil.f90 gem.f90 outd.f90 fcnt.f fft_wrapper.f
+SRCS =	gem_com.f90 gem_equil.f90 gem_main.f90 gem_outd.f90 gem_fcnt.f90 gem_fft_wrapper.f90
 
-OBJS =	erf.o gem_com.o equil.o gem.o outd.o fcnt.o fft_wrapper.o
+OBJS =	gem_com.o gem_equil.o gem_main.o gem_outd.o gem_fcnt.o gem_fft_wrapper.o
 
-LIBS = $(DFFTPACK) -mkl
-PLIB = pputil.o
+LIBS = $(DFFTPACK)
+PLIB = gem_pputil.o
 
 F90 = ftn
 #OPT = -FR -r8 -heap-arrays -O2 -g -traceback -check bounds
-OPT = -FR -r8 -O2
+OPT = -FR -r8 -O3
 LDFLAGS = 
 
 #all : gem
 
-gem: equil.o gem.o outd.o fcnt.o pputil.o gem_com.o erf.o fft_wrapper.o
-	$(F90)  -o gem $(OPT) $(OBJS) $(PLIB) $(LIBS) 
+gem_main: gem_equil.o gem_main.o gem_outd.o gem_fcnt.o gem_pputil.o gem_com.o gem_fft_wrapper.o
+	$(F90)  -o gem_main $(OPT) $(OBJS) $(PLIB) $(LIBS) 
 
-pputil.o: pputil.f
-	$(F90) -c $(OPT) pputil.f
+gem_pputil.o: gem_pputil.f90
+	$(F90) -c $(OPT) gem_pputil.f90
 
-gem_com.o: gem_com.f90 pputil.o
+gem_com.o: gem_com.f90 gem_pputil.o
 	$(F90) -c $(OPT) gem_com.f90
 
-equil.o: equil.f90 pputil.o
-	$(F90) -c $(OPT) equil.f90
+gem_equil.o: gem_equil.f90 gem_pputil.o
+	$(F90) -c $(OPT) gem_equil.f90
 
-gem.o: gem.f90 fft_wrapper.o pputil.o gem_com.o equil.o
-	$(F90) -c $(OPT) gem.f90
+gem_main.o: gem_main.f90 gem_fft_wrapper.o gem_pputil.o gem_com.o gem_equil.o
+	$(F90) -c $(OPT) gem_main.f90
 
-outd.o: outd.f90 fft_wrapper.o pputil.o gem_com.o equil.o
-	$(F90) -c $(OPT) outd.f90
+gem_outd.o: gem_outd.f90 gem_fft_wrapper.o gem_pputil.o gem_com.o gem_equil.o
+	$(F90) -c $(OPT) gem_outd.f90
 
-fcnt.o: fcnt.f
-	$(F90) -c $(OPT) fcnt.f
+gem_fcnt.o: gem_fcnt.f90
+	$(F90) -c $(OPT) gem_fcnt.f90
 
-erf.o: erf.f
-	$(F90) -c $(OPT) -FI erf.f
-
-fft_wrapper.o: fft_wrapper.f
-	$(F90) -c $(OPT) fft_wrapper.f
+gem_fft_wrapper.o: gem_fft_wrapper.f90
+	$(F90) -c $(OPT) gem_fft_wrapper.f90

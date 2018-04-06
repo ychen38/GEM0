@@ -7,7 +7,8 @@ flux
 *~
 *.mod
 yyre*
-gem
+gem_main
+
 *.pro
 *.txt
 mdhis

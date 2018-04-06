@@ -1,6 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-MODULE pputil
+MODULE gem_pputil
 !
 !  use fft_wrapper
   IMPLICIT NONE
@@ -13,7 +13,7 @@ MODULE pputil
   INTEGER, SAVE :: me, nvp,npp,GCLR,TCLR
   INTEGER, SAVE :: pmove_tag=0
   INTEGER, SAVE :: TUBE_COMM,GRID_COMM
-  REAL(8), DIMENSION(:), ALLOCATABLE, SAVE :: s_buf, r_buf
+  REAL, DIMENSION(:), ALLOCATABLE, SAVE :: s_buf, r_buf
   INTEGER, DIMENSION(:), ALLOCATABLE, SAVE :: s_counts, s_displ
   INTEGER, DIMENSION(:), ALLOCATABLE, SAVE :: r_counts, r_displ
   INTEGER, DIMENSION(:), ALLOCATABLE, SAVE :: ipsend, iphole
@@ -46,31 +46,31 @@ CONTAINS
 !
 !===========================================================================
   SUBROUTINE init_pmove(xp, np, lz, ierr)
-!
-    INCLUDE 'mpif.h'
-!
-    REAL(8), DIMENSION(:), INTENT(in) :: xp
+    !
+    use mpi
+    !
+    REAL, DIMENSION(:), INTENT(in) :: xp
     INTEGER, INTENT(in) :: np
-    REAL(8), INTENT(in) :: lz
+    REAL, INTENT(in) :: lz
     INTEGER, INTENT(out) :: ierr
-!
-!  Local vars
+    !
+    !  Local vars
     INTEGER :: nsize, ksize
     INTEGER :: i, ip, iz, ih, iwork
-    REAL(8) :: dzz, xt
+    REAL :: dzz, xt
     INTEGER, DIMENSION(0:nvp-1) :: isb
-!
-!----------------------------------------------------------------------
-!              0.   Allocate fixed size arrays
-!
+    !
+    !----------------------------------------------------------------------
+    !              0.   Allocate fixed size arrays
+    !
     IF( .not. ALLOCATED(s_counts) ) ALLOCATE(s_counts(0:nvp-1))
     IF( .not. ALLOCATED(s_displ) ) ALLOCATE(s_displ(0:nvp-1))
     IF( .not. ALLOCATED(r_counts) ) ALLOCATE(r_counts(0:nvp-1))
     IF( .not. ALLOCATED(r_displ) ) ALLOCATE(r_displ(0:nvp-1))
-!
-!----------------------------------------------------------------------
-!              1.  Construct send buffer
-!
+    !
+    !----------------------------------------------------------------------
+    !              1.  Construct send buffer
+    !
     dzz = lz / nvp
     s_counts = 0
     DO ip = 1,np
@@ -84,7 +84,7 @@ CONTAINS
     DO i=1,nvp-1
        s_displ(i) = s_displ(i-1) + s_counts(i-1)
     END DO
-!
+    !
     nsize = sum(s_counts)
     IF( .not. ALLOCATED(s_buf) ) THEN
        ksize=2*nsize         ! To prevent too much futur reallocations
@@ -99,10 +99,10 @@ CONTAINS
        ALLOCATE(ipsend(1:nsize))
        ALLOCATE(iphole(1:nsize))
     END IF
-!
-!----------------------------------------------------------------------
-!              2.  Construct (sorted) pointers to holes
-!
+    !
+    !----------------------------------------------------------------------
+    !              2.  Construct (sorted) pointers to holes
+    !
     isb(0:nvp-1) = s_displ(0:nvp-1)
     ih = 0
     DO ip=1,np
@@ -115,17 +115,17 @@ CONTAINS
           iphole(ih) = ip
        END IF
     END DO
-!
-!----------------------------------------------------------------------
-!              3.  Construct receive buffer
-!
+    !
+    !----------------------------------------------------------------------
+    !              3.  Construct receive buffer
+    !
     CALL MPI_ALLTOALL(s_counts, 1, MPI_INTEGER, &
          & r_counts, 1, MPI_INTEGER, TUBE_COMM, ierr)
     r_displ(0) = 0
     DO i=1,nvp-1
        r_displ(i) = r_displ(i-1) + r_counts(i-1)
     END DO
-!
+    !
     nsize = sum(r_counts)
     IF( .not. ALLOCATED(r_buf) ) THEN
        ksize=2*nsize         ! To prevent too much futur reallocations
@@ -134,28 +134,28 @@ CONTAINS
        DEALLOCATE(r_buf)
        ALLOCATE(r_buf(1:nsize))
     END IF
-!
-!  Check for part. array overflow
+    !
+    !  Check for part. array overflow
     ierr = 0
     nsize = np - sum(s_counts) + sum(r_counts)
     if( nsize .gt. size(xp) ) then
        write(*,*) 'PE', me, 'Particle array overflow'
        ierr = 1
     end if
-!    call ppsum(ierr)
-!
-!----------------------------------------------------------------------
-!              4.  Initialize tag
-!
+    !    call ppsum(ierr)
+    !
+    !----------------------------------------------------------------------
+    !              4.  Initialize tag
+    !
     pmove_tag = 101
-!
+    !
   END SUBROUTINE init_pmove
 !===========================================================================
   SUBROUTINE pmove(xp, np_old, np_new, ierr)
 !
-    INCLUDE 'mpif.h'
+    use mpi
 !
-    REAL(8), DIMENSION(:), INTENT(inout) :: xp
+    REAL, DIMENSION(:), INTENT(inout) :: xp
     INTEGER, INTENT(in) :: np_old
     INTEGER, INTENT(out) :: np_new
     INTEGER, INTENT(out) :: ierr
@@ -262,7 +262,8 @@ CONTAINS
 !===========================================================================
   SUBROUTINE end_pmove(ierr)
 !
-    INCLUDE 'mpif.h'
+    use mpi
+
     INTEGER, INTENT(OUT) :: ierr
 !
 !   Local vars
@@ -271,7 +272,9 @@ CONTAINS
 !
 !===========================================================================
   SUBROUTINE dispi(iarr,string)
-    INCLUDE 'mpif.h'
+
+    use mpi
+
     INTEGER, INTENT(in) :: iarr(:)
     character(len=*), INTENT(in) :: string
     INTEGER :: i, ierr
@@ -286,7 +289,9 @@ CONTAINS
   END SUBROUTINE dispi
 !===========================================================================
   SUBROUTINE disp2i(arr,string)
-    INCLUDE 'mpif.h'
+
+    use mpi
+
     INTEGER, INTENT(in) :: arr(:,:)
     character(len=*), INTENT(in) :: string
     INTEGER :: i, j, ierr
@@ -303,8 +308,10 @@ CONTAINS
   END SUBROUTINE disp2i
 !===========================================================================
   SUBROUTINE dispr(arr,string)
-    INCLUDE 'mpif.h'
-    REAL(8), INTENT(in) :: arr(:)
+
+    use mpi
+
+    REAL, INTENT(in) :: arr(:)
     character(len=*), INTENT(in) :: string
     INTEGER :: i, ierr
 !
@@ -318,8 +325,8 @@ CONTAINS
   END SUBROUTINE dispr
 !===========================================================================
   SUBROUTINE disp2r(arr,string)
-    INCLUDE 'mpif.h'
-    REAL(8), INTENT(in) :: arr(:,:)
+    use mpi
+    REAL, INTENT(in) :: arr(:,:)
     character(len=*), INTENT(in) :: string
     INTEGER :: i, j, ierr
 !
@@ -336,33 +343,33 @@ CONTAINS
   END SUBROUTINE disp2r
 !======================================================================
 !
- 	SUBROUTINE ppinit(idproc,nproc,ntube,com1,com2)
+      SUBROUTINE ppinit(idproc,nproc,ntube,com1,com2)
 !
-     INCLUDE 'mpif.h'
+     use mpi
      INTEGER, INTENT(IN) :: ntube
      INTEGER, INTENT(OUT) :: nproc
-	INTEGER, INTENT(OUT) :: idproc,com1,com2
-	INTEGER :: ierr,npp
+     INTEGER, INTENT(OUT) :: idproc,com1,com2
+     INTEGER :: ierr,npp
 !
-	CALL MPI_INIT(ierr)
-	CALL MPI_COMM_SIZE(MPI_COMM_WORLD, npp, ierr)
-	CALL MPI_COMM_RANK(MPI_COMM_WORLD, me, ierr)
-	nproc = npp
-	IDPROC = me
+     CALL MPI_INIT(ierr)
+     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, npp, ierr)
+     CALL MPI_COMM_RANK(MPI_COMM_WORLD, me, ierr)
+     nproc = npp
+     IDPROC = me
 ! 
-	GCLR=INT(me/ntube)
-	TCLR=MOD(me,ntube)
+     GCLR=INT(me/ntube)
+     TCLR=MOD(me,ntube)
 !
-	CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,GCLR,&
-     	 &	TCLR,GRID_COMM,ierr)
-	CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,TCLR,&
-         &	GCLR,TUBE_COMM,ierr)
+     CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,GCLR,&
+           &     TCLR,GRID_COMM,ierr)
+     CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,TCLR,&
+         &     GCLR,TUBE_COMM,ierr)
 !
-	com1=TUBE_COMM
-	com2=GRID_COMM
-	nvp=npp/ntube
+     com1=TUBE_COMM
+     com2=GRID_COMM
+     nvp=npp/ntube
 !
-	END SUBROUTINE ppinit
+     END SUBROUTINE ppinit
 !
 !===========================================================================
   SUBROUTINE ppexit
@@ -374,9 +381,9 @@ CONTAINS
 !===========================================================================
 !=========================GLOBAL SUM========================================
   SUBROUTINE ppsum_r(f)
-    INCLUDE 'mpif.h'
-    REAL(8), INTENT(INOUT) :: f
-    REAL(8) :: sum
+    use mpi
+    REAL, INTENT(INOUT) :: f
+    REAL :: sum
     INTEGER :: ierr
 !
     CALL MPI_ALLREDUCE(f, sum, 1, MPI_REAL8, MPI_SUM,&
@@ -385,9 +392,9 @@ CONTAINS
   END SUBROUTINE ppsum_r
 !===========================================================================
   SUBROUTINE ppsum_ra(f)
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION (:), INTENT(INOUT) :: f
-    REAL(8), DIMENSION (size(f)) :: sum
+    use mpi
+    REAL, DIMENSION (:), INTENT(INOUT) :: f
+    REAL, DIMENSION (size(f)) :: sum
     INTEGER :: count, ierr
 !
     count = size(f)
@@ -397,7 +404,7 @@ CONTAINS
   END SUBROUTINE ppsum_ra
 !===========================================================================
   SUBROUTINE ppsum_i(f)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, INTENT(INOUT) :: f
     INTEGER :: sum
     INTEGER :: ierr
@@ -408,7 +415,7 @@ CONTAINS
   END SUBROUTINE ppsum_i
 !===========================================================================
   SUBROUTINE ppsum_ia(f)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, DIMENSION (:), INTENT(INOUT) :: f
     INTEGER, DIMENSION (size(f)) :: sum
     INTEGER :: count, ierr
@@ -421,9 +428,9 @@ CONTAINS
 !===========================================================================
 !=========================GLOBAL MAX========================================
   SUBROUTINE ppmax_r(f)
-    INCLUDE 'mpif.h'
-    REAL(8), INTENT(INOUT) :: f
-    REAL(8) :: max
+    use mpi
+    REAL, INTENT(INOUT) :: f
+    REAL :: max
     INTEGER :: ierr
 !
     CALL MPI_ALLREDUCE(f, max, 1, MPI_REAL8, MPI_MAX,&
@@ -432,9 +439,9 @@ CONTAINS
   END SUBROUTINE ppmax_r
 !===========================================================================
   SUBROUTINE ppmax_ra(f)
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION (:), INTENT(INOUT) :: f
-    REAL(8), DIMENSION (size(f)) :: max
+    use mpi
+    REAL, DIMENSION (:), INTENT(INOUT) :: f
+    REAL, DIMENSION (size(f)) :: max
     INTEGER :: count, ierr
 !
     count = size(f)
@@ -444,7 +451,7 @@ CONTAINS
   END SUBROUTINE ppmax_ra
 !===========================================================================
   SUBROUTINE ppmax_i(f)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, INTENT(INOUT) :: f
     INTEGER :: max
     INTEGER :: ierr
@@ -455,7 +462,7 @@ CONTAINS
   END SUBROUTINE ppmax_i
 !===========================================================================
   SUBROUTINE ppmax_ia(f)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, DIMENSION (:), INTENT(INOUT) :: f
     INTEGER, DIMENSION (size(f)) :: max
     INTEGER :: count, ierr
@@ -468,9 +475,9 @@ CONTAINS
 !===========================================================================
 !=========================GLOBAL MIN========================================
   SUBROUTINE ppmin_r(f)
-    INCLUDE 'mpif.h'
-    REAL(8), INTENT(INOUT) :: f
-    REAL(8) :: min
+    use mpi
+    REAL, INTENT(INOUT) :: f
+    REAL :: min
     INTEGER :: ierr
 !
     CALL MPI_ALLREDUCE(f, min, 1, MPI_REAL8, MPI_MIN,&
@@ -479,9 +486,9 @@ CONTAINS
   END SUBROUTINE ppmin_r
 !===========================================================================
   SUBROUTINE ppmin_ra(f)
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION (:), INTENT(INOUT) :: f
-    REAL(8), DIMENSION (size(f)) :: min
+    use mpi
+    REAL, DIMENSION (:), INTENT(INOUT) :: f
+    REAL, DIMENSION (size(f)) :: min
     INTEGER :: count, ierr
 !
     count = size(f)
@@ -491,7 +498,7 @@ CONTAINS
   END SUBROUTINE ppmin_ra
 !===========================================================================
   SUBROUTINE ppmin_i(f)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, INTENT(INOUT) :: f
     INTEGER :: min
     INTEGER :: ierr
@@ -502,7 +509,7 @@ CONTAINS
   END SUBROUTINE ppmin_i
 !===========================================================================
   SUBROUTINE ppmin_ia(f)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, DIMENSION (:), INTENT(INOUT) :: f
     INTEGER, DIMENSION (size(f)) :: min
     INTEGER :: count, ierr
@@ -515,15 +522,15 @@ CONTAINS
 !=======================================================================
 !==============================  PPTRANSP ==============================
   SUBROUTINE pptransp_c(a, b)
-    INCLUDE 'mpif.h'
-    COMPLEX(8), DIMENSION(:,:), INTENT(in) :: a
-    COMPLEX(8), DIMENSION(:,:), INTENT(out) :: b
+    use mpi
+    complex, DIMENSION(:,:), INTENT(in) :: a
+    complex, DIMENSION(:,:), INTENT(out) :: b
 !
 !   Local vars
     INTEGER :: nx, nxp, ny, nyp
     INTEGER :: i, j, isrt, iend, ierr
     INTEGER, DIMENSION(1:nvp) :: idsr
-    COMPLEX(8), DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2)) :: s_buf, r_buf
+    complex, DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2)) :: s_buf, r_buf
     INTEGER :: status(MPI_STATUS_SIZE)
 !----------------------------------------------------------------------
 !              0.   Check array dimensions
@@ -561,15 +568,15 @@ CONTAINS
   END SUBROUTINE pptransp_c
 !=======================================================================
   SUBROUTINE pptransp_r(a, b)
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION(:,:), INTENT(in) :: a
-    REAL(8), DIMENSION(:,:), INTENT(out) :: b
+    use mpi
+    REAL, DIMENSION(:,:), INTENT(in) :: a
+    REAL, DIMENSION(:,:), INTENT(out) :: b
 !
 !   Local vars
     INTEGER :: nx, nxp, ny, nyp
     INTEGER :: i, j, isrt, iend, ierr
     INTEGER, DIMENSION(1:nvp) :: idsr
-    REAL(8), DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2)) :: s_buf, r_buf
+    REAL, DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2)) :: s_buf, r_buf
     INTEGER :: status(MPI_STATUS_SIZE)
 !----------------------------------------------------------------------
 !              0.   Check array dimensions
@@ -607,7 +614,7 @@ CONTAINS
   END SUBROUTINE pptransp_r
 !=======================================================================
   SUBROUTINE pptransp_i(a, b)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, DIMENSION(:,:), INTENT(in) :: a
     INTEGER, DIMENSION(:,:), INTENT(out) :: b
 !
@@ -656,15 +663,15 @@ CONTAINS
 !==============================  PPTRANSP2==============================
 !=======================================================================
   SUBROUTINE pptransp2_c(a, b)
-    INCLUDE 'mpif.h'
-    COMPLEX(8), DIMENSION(:,:,:), INTENT(in) :: a
-    COMPLEX(8), DIMENSION(:,:,:), INTENT(out) :: b
+    use mpi
+    complex, DIMENSION(:,:,:), INTENT(in) :: a
+    complex, DIMENSION(:,:,:), INTENT(out) :: b
 !
 !   Local vars
     INTEGER :: nx, nxp, ny, nyp, nz, nzp
     INTEGER :: j, iter, isrt, iend, ierr
     INTEGER, DIMENSION(1:nvp) :: idsr
-    COMPLEX(8), DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2), 1:SIZE(a,3)) :: s_buf, r_buf
+    complex, DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2), 1:SIZE(a,3)) :: s_buf, r_buf
     INTEGER :: status(MPI_STATUS_SIZE)
 !----------------------------------------------------------------------
 !              0.   Check array dimensions
@@ -709,15 +716,15 @@ CONTAINS
   END SUBROUTINE pptransp2_c
 !=======================================================================
   SUBROUTINE pptransp2_r(a, b)
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION(:,:,:), INTENT(in) :: a
-    REAL(8), DIMENSION(:,:,:), INTENT(out) :: b
+    use mpi
+    REAL, DIMENSION(:,:,:), INTENT(in) :: a
+    REAL, DIMENSION(:,:,:), INTENT(out) :: b
 !
 !   Local vars
     INTEGER :: nx, nxp, ny, nyp, nz, nzp
     INTEGER :: j, iter, isrt, iend, ierr
     INTEGER, DIMENSION(1:nvp) :: idsr
-    REAL(8), DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2), 1:SIZE(a,3)) :: s_buf, r_buf
+    REAL, DIMENSION(1:SIZE(a,1)/nvp, 1:SIZE(a,2), 1:SIZE(a,3)) :: s_buf, r_buf
     INTEGER :: status(MPI_STATUS_SIZE)
 !----------------------------------------------------------------------
 !              0.   Check array dimensions
@@ -762,7 +769,7 @@ CONTAINS
   END SUBROUTINE pptransp2_r
 !=======================================================================
   SUBROUTINE pptransp2_i(a, b)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, DIMENSION(:,:,:), INTENT(in) :: a
     INTEGER, DIMENSION(:,:,:), INTENT(out) :: b
 !
@@ -815,12 +822,12 @@ CONTAINS
   END SUBROUTINE pptransp2_i
 !===========================================================================
   SUBROUTINE timera(icntrl,string,eltime)
-    INCLUDE 'mpif.h'
+    use mpi
     INTEGER, INTENT(in) :: icntrl
     CHARACTER(len=*), INTENT(in) :: string
-    REAL(8), OPTIONAL, INTENT (OUT) :: eltime
-    REAL(8), SAVE :: startt=0.0
-    REAL(8) :: endt
+    REAL, OPTIONAL, INTENT (OUT) :: eltime
+    REAL, SAVE :: startt=0.0
+    REAL :: endt
     INTEGER :: ierr
 !
     SELECT CASE (icntrl)
@@ -850,14 +857,14 @@ CONTAINS
 !  flag=0 : Add guard cell data to field
 !  flag=1 : Copy field to guard cells
 !
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION(:,:), INTENT(INOUT) :: f
+    use mpi
+    REAL, DIMENSION(:,:), INTENT(INOUT) :: f
     INTEGER, INTENT(IN) :: nidbas, flag
 !
 !  Local vars and arrays
     INTEGER :: left, right, ierr, tag=200, status(MPI_STATUS_SIZE)
     INTEGER :: n1, np
-    REAL(8), DIMENSION(:), ALLOCATABLE, SAVE :: buffer
+    REAL, DIMENSION(:), ALLOCATABLE, SAVE :: buffer
 !----------------------------------------------------------------------
 !
 !!! Left and right node ( assume periodicity)
@@ -983,14 +990,14 @@ CONTAINS
 !  flag=0 : Add guard cell data to field
 !  flag=1 : Copy field to guard cells
 !
-    INCLUDE 'mpif.h'
-    REAL(8), DIMENSION(:,:,:), INTENT(INOUT) :: f
+    use mpi
+    REAL, DIMENSION(:,:,:), INTENT(INOUT) :: f
     INTEGER, INTENT(IN) :: nidbas, flag
 !
 !  Local vars and arrays
     INTEGER :: left, right, ierr, tag=200, status(MPI_STATUS_SIZE)
     INTEGER :: n1, n2, n1n2, np
-    REAL(8), DIMENSION(:,:), ALLOCATABLE, SAVE :: buffer
+    REAL, DIMENSION(:,:), ALLOCATABLE, SAVE :: buffer
 !----------------------------------------------------------------------
 !
 !!! Left and right node ( assume periodicity)
@@ -1116,14 +1123,14 @@ CONTAINS
 !   partitionned
 !
     INTEGER, INTENT(IN) :: isign
-    COMPLEX(8), DIMENSION (:,:), INTENT(INOUT) :: f
-    COMPLEX(8), DIMENSION (:,:), INTENT(OUT) :: g
+    complex, DIMENSION (:,:), INTENT(INOUT) :: f
+    complex, DIMENSION (:,:), INTENT(OUT) :: g
 !
 !  Local vars and arrays
     INTEGER :: nx, nyp, ny, nxp
-    REAL(8) :: tablex(2*SIZE(f,1)), tabley(2*SIZE(g,1))
-    REAL(8) :: workx(4*SIZE(f,1)), worky(4*SIZE(g,1))
-    COMPLEX(8) :: dummy
+    REAL :: tablex(2*SIZE(f,1)), tabley(2*SIZE(g,1))
+    REAL :: workx(4*SIZE(f,1)), worky(4*SIZE(g,1))
+    complex :: dummy
     INTEGER :: i, j
 !
     nx = SIZE(f,1); nyp = SIZE(f,2)
@@ -1148,14 +1155,14 @@ CONTAINS
 !   partitionned
 !
     INTEGER, INTENT(IN) :: isign
-    COMPLEX(8), DIMENSION (:,:,:), INTENT(INOUT) :: f
-    COMPLEX(8), DIMENSION (:,:,:), INTENT(OUT) :: g
+    complex, DIMENSION (:,:,:), INTENT(INOUT) :: f
+    complex, DIMENSION (:,:,:), INTENT(OUT) :: g
 !
 !  Local vars and arrays
     INTEGER :: nx, nyp, ny, nxp, nz
-    REAL(8) :: tablex(2*SIZE(f,1)), tabley(2*SIZE(g,1))
-    REAL(8) :: workx(4*SIZE(f,1)), worky(4*SIZE(g,1))
-    COMPLEX(8) :: dummy
+    REAL :: tablex(2*SIZE(f,1)), tabley(2*SIZE(g,1))
+    REAL :: workx(4*SIZE(f,1)), worky(4*SIZE(g,1))
+    complex :: dummy
     INTEGER :: i, j, k
 !
     nx = SIZE(f,1); nyp = SIZE(f,3)
@@ -1178,5 +1185,5 @@ CONTAINS
     END DO
   END SUBROUTINE PPCFFT2_3D
 !===========================================================================
-END MODULE pputil
+END MODULE gem_pputil
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
