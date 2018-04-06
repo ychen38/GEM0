@@ -1,16 +1,21 @@
 sweep
 *.out
-mxamp
-plot*
-flux
+
 *.o
 *~
 *.mod
+
 yyre*
 gem_main
 
 *.pro
 *.txt
+
+mxamp
+plot*
+flux
+eqflux
+
 mdhis
 mdhisa
 eqdat
@@ -18,9 +23,11 @@ xpp
 stress
 indicator
 freq
+
 dump/
 matrix/
 out/
+
 *.ps
 
 
