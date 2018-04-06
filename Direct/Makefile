@@ -35,3 +35,6 @@ gem_fcnt.o: gem_fcnt.f90
 
 gem_fft_wrapper.o: gem_fft_wrapper.f90
 	$(F90) -c $(OPT) gem_fft_wrapper.f90
+
+clean:
+	rm -f *.o *.lst *.mod gem_main
