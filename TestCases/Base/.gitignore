@@ -30,7 +30,7 @@ out/
 
 *.ps
 
-#only gem_equil.f90 is meant to be changed for each case
+#only gem_equil.f90 and gem.in are to be changed for each test case
 Makefile
 *.h
 gem_com.f90

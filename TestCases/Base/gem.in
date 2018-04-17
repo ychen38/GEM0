@@ -14,7 +14,7 @@
  0.06   30     0.05    0.0   0.0   0.0   1000   0.0  1     3
 
 'DT      NM     nsm     xshape  yshape  zshape'
- 2.     5000     1       1.0     1.0     137.44
+ 3.     5000     1       1.0     1.0     137.44
 
 'iput iget ision isiap   peritr llk mlk onemd izonal ineq0   iflut'
   1    0     1     0       0     0   1    1     1      1       1
