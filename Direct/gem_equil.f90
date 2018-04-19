@@ -4,7 +4,7 @@ MODULE gem_equil
   real :: mimp=2,mcmp=12,chgi=1,chgc=6
   real :: elon0=1.0,tria0=0.0,rmaj0=1000.0,r0,a=360.0,selon0=0.0,&
              stria0=0.0,rmaj0p=-0.0,q0p=0.006,q0=1.4, elonp0=0.,triap0=0.,erp=0.01,er0=0.,q0abs
-  real :: Rovera,shat0,teti,tcti,rhoia,Rovlni,Rovlti,Rovlne,Rovlte,Rovlnc,Rovltc,ncne,nuacs
+  real :: beta,Rovera,shat0,teti,tcti,rhoia,Rovlni,Rovlti,Rovlne,Rovlte,Rovlnc,Rovltc,ncne,nuacs
   real :: gamma_E,mach
   real :: f0, f0p,bunit
   real :: rin,rout,dr,dth,delz,jacmax,eadj
