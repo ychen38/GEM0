@@ -27,12 +27,8 @@ MODULE gem_equil
                                       vparip,vparcp,vparbp, &
                                       capti,capte,captb,captc,capni,capne,&
                                       capnb,capnc,zeff,nue0,phinc,phincp,&
-                                      er,upari,&
-                                      dldth,sinu,cosu,dudl,dzdl,bps,&
-                                      grr,grz,gtr,gtz, &
-                                      grdgl,grdgrho,gtdgl,gtdgrho, &
-                                      dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
-                                      db2dl,db2drho,dbpsdl,dipdr
+                                      er,upari,dipdr
+
 !for Miller local flux-tube
   real :: candyf0p
   real,dimension(:),allocatable :: candyd0,candyd1,candyd2,candynus,candynu1,candydr
@@ -59,6 +55,11 @@ contains
       character(len=100) :: header,header2
 
       real :: e=1.6e-19,eps0=8.85e-12,me=0.9e-30,vte,pprime
+      real,dimension(:),allocatable :: dldth,sinu,cosu,dudl,dzdl,bps,&
+                                       grr,grz,gtr,gtz, &
+                                       grdgl,grdgrho,gtdgl,gtdgrho, &
+                                       dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
+                                       db2dl,db2drho,dbpsdl
 
       allocate(bfld(0:nr,0:ntheta),qhat(0:nr,0:ntheta),radius(0:nr,0:ntheta), &
                gr(0:nr,0:ntheta),gth(0:nr,0:ntheta),grdgt(0:nr,0:ntheta), &
