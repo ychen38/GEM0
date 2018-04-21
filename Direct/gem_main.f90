@@ -187,7 +187,7 @@ subroutine init
      write(19,*)'a/cs=', a/sqrt(t0e(nr/2)/mimp)
      write(19,*)'i,   sf,   ni,   ne,   nc,   ti,   tc,   capni,   capnc, captc'
      do i = 0,nr
-        write(19,99)i,sf(i),xn0i(i),xn0e(i),xn0c(i),t0i(i),t0c(i),capni(i),capnc(i),captc(i)
+        write(19,99)i,sf(i),xn0i(i),xn0e(i),t0i(i),t0e(i),capni(i),capne(i),capti(i),capte(i)
      end do
      write(19,99)i,cn0e,cn0s(1),cn0s(2),cn0s(3)
      close(19)
@@ -2040,7 +2040,7 @@ subroutine spec(n)
      open(17, file='yyre', status='unknown',position='append')
 
      write(*,10)i,rmsphi(n),rmsapa(n),pf,efe,pfi,efi,avewi(1,n),&
-          avewe(n),tot_field_e,tot_joule,tot_joule1
+          avewe(n),yyre(1,0),yyim(1,0),yyamp(1,0)
 
 10   format(1x,i6,12(2x,e10.3))
 11   format(6x,5(2x,e12.5))
@@ -2049,7 +2049,7 @@ subroutine spec(n)
 15   format(1x,i6,8(2x,e10.3))
 
      write(9,10)i,rmsphi(n),rmsapa(n),pf,efe,pfi,efi,avewi(1,n),&
-          avewe(n),tot_field_e,tot_joule,tot_joule1
+          avewe(n),yyre(1,0),yyim(1,0),yyamp(1,0)
 
      write(11,12)i,pf/pflxgb,pfi/pflxgb,pfc/pflxgb,efe/eflxgb,efi/eflxgb,&
           efc/eflxgb,pf_em/pflxgb,pfi_em/pflxgb,pfc_em/pflxgb,efe_em/eflxgb,&
@@ -5473,7 +5473,7 @@ subroutine fltx(u,isbl,ism)
         endif
         ky=sgny*2.0*pi*float(m1)/ly
         kx = i*pi/lx
-        b2 = xshape**2*kx**2+yshape**2*ky**2
+        b2 = 0. !xshape**2*kx**2+yshape**2*ky**2
 
         filterx(i,j) = 2.0/imx*exp(-b2**2)   !be careful with always filtering with hyper-Gaussian
 

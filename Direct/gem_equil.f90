@@ -1,6 +1,9 @@
 MODULE gem_equil
   IMPLICIT NONE
-  integer :: itube,ibase,iperi,iperidf,ibunit,icandy=1,isprime=0,ildu=0,eldu=0
+! icandy=0 sets the naieve flux-tube model, i.e. assumes the local flux surfaces are indeed given by R'_0(r0),s_kappa, s_delta, q0p, etc.
+! The field gradients dbdr(r,theta), dbdth(r, theta), and dydr(r,theta) are then all calculated accordingly.
+! icandy=1 uses the flux-tube model of Candy PPCF 2009 
+  integer :: itube,ibase,iperi,iperidf,ibunit,icandy=0,isprime=0,ildu=0,eldu=0
   real :: mimp=2,mcmp=12,chgi=1,chgc=6
   real :: elon0=1.0,tria0=0.0,rmaj0=1000.0,r0,a=360.0,selon0=0.0,&
              stria0=0.0,rmaj0p=-0.0,q0p=0.006,q0=1.4, elonp0=0.,triap0=0.,erp=0.01,er0=0.,q0abs
@@ -24,12 +27,8 @@ MODULE gem_equil
                                       vparip,vparcp,vparbp, &
                                       capti,capte,captb,captc,capni,capne,&
                                       capnb,capnc,zeff,nue0,phinc,phincp,&
-                                      er,upari,&
-                                      dldth,sinu,cosu,dudl,dzdl,bps,&
-                                      grr,grz,gtr,gtz, &
-                                      grdgl,grdgrho,gtdgl,gtdgrho, &
-                                      dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
-                                      db2dl,db2drho,dbpsdl,dipdr
+                                      er,upari,dipdr
+
 !for Miller local flux-tube
   real :: candyf0p
   real,dimension(:),allocatable :: candyd0,candyd1,candyd2,candynus,candynu1,candydr
@@ -56,6 +55,11 @@ contains
       character(len=100) :: header,header2
 
       real :: e=1.6e-19,eps0=8.85e-12,me=0.9e-30,vte,pprime
+      real,dimension(:),allocatable :: dldth,sinu,cosu,dudl,dzdl,bps,&
+                                       grr,grz,gtr,gtz, &
+                                       grdgl,grdgrho,gtdgl,gtdgrho, &
+                                       dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
+                                       db2dl,db2drho,dbpsdl
 
       allocate(bfld(0:nr,0:ntheta),qhat(0:nr,0:ntheta),radius(0:nr,0:ntheta), &
                gr(0:nr,0:ntheta),gth(0:nr,0:ntheta),grdgt(0:nr,0:ntheta), &
@@ -110,6 +114,7 @@ contains
       if(idiag==1)write(*,*)pi,dr,dth,nr,ntheta
 
 ! specify f(r),q(r)
+      f0p = 0. !by default
       do i = 0,nr
          r = rin+i*dr
          f(i) = rmaj0
@@ -307,7 +312,7 @@ contains
       end do
       dum2 = dum2*f0/(2*pi)
 
-!compute term3 in (21) ... WWan
+!compute term3 in (21)
       pprime =  (t0i0p*ni0+t0i0*ni0p + t0e0p*ne0+t0e0*ne0p)/psip(nr2)*isprime
       dum3 = 0.
       do j = 0,ntheta-1
@@ -467,8 +472,8 @@ contains
          end do
       end do
 
-    !compute the flux coordinate theta                                                                                                                                                        \
-                                                                                                                                                                                               
+    !compute the flux coordinate theta
+
     do i = 0,nr
        thflx(i,ntheta/2) = 0.
        dum = 0.
