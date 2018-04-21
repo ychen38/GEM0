@@ -1,8 +1,5 @@
 MODULE gem_equil
   IMPLICIT NONE
-! icandy=0 sets the naieve flux-tube model, i.e. assumes the local flux surfaces are indeed given by R'_0(r0),s_kappa, s_delta, q0p, etc.
-! The field gradients dbdr(r,theta), dbdth(r, theta), and dydr(r,theta) are then all calculated accordingly.
-! icandy=1 uses the flux-tube model of Candy PPCF 2009 
   integer :: itube,ibase,iperi,iperidf,ibunit,icandy=0,isprime=0,ildu=0,eldu=0
   real :: mimp=2,mcmp=12,chgi=1,chgc=6
   real :: elon0=1.0,tria0=0.0,rmaj0=1000.0,r0,a=360.0,selon0=0.0,&
@@ -27,12 +24,8 @@ MODULE gem_equil
                                       vparip,vparcp,vparbp, &
                                       capti,capte,captb,captc,capni,capne,&
                                       capnb,capnc,zeff,nue0,phinc,phincp,&
-                                      er,upari,elonp,triap,&
-                                      dldth,sinu,cosu,dudl,dzdl,bps,&
-                                      grr,grz,gtr,gtz, &
-                                      grdgl,grdgrho,gtdgl,gtdgrho, &
-                                      dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
-                                      db2dl,db2drho,dbpsdl,dipdr
+                                      er,upari,dipdr
+
 !for Miller local flux-tube
   real :: candyf0p
   real,dimension(:),allocatable :: candyd0,candyd1,candyd2,candynus,candynu1,candydr
@@ -61,6 +54,7 @@ contains
       real(8) :: e,proton,xu,vu,omegau,nu,Tu,Bu
       real(8) :: r1,r2,th1,th2,z1,z2,rdum,rdum1,thdum,thdum1,wx0,wx1,wy0,wy1,psitrin,psita,psitrout
       real(8) :: btor(0:nr,0:ntheta),rhogem(0:nr),rgemplot(0:ntheta-1),zgemplot(0:ntheta-1)
+      real(8) :: elonp(0:nr),triap(0:nr)
 
       allocate(bfld(0:nr,0:ntheta),qhat(0:nr,0:ntheta),radius(0:nr,0:ntheta), &
                gr(0:nr,0:ntheta),gth(0:nr,0:ntheta),grdgt(0:nr,0:ntheta), &
@@ -72,14 +66,21 @@ contains
       allocate(rmaj(0:nr), elon(0:nr), tria(0:nr), sf(0:nr), psi(0:nr),&
                rmajp(0:nr),selon(0:nr),stria(0:nr),psip(0:nr),&
                f(0:nr),jacoba(0:nr),t0i(0:nr),t0c(0:nr),t0e(0:nr),t0ip(0:nr),&
-               t0ep(0:nr),capti(0:nr),captc(0:nr),capte(0:nr),elonp(0:nr),triap(0:nr),&
-               xn0e(0:nr),xn0i(0:nr),xn0c(0:nr),capne(0:nr),capni(0:nr),capnc(0:nr))
+               t0ep(0:nr),capti(0:nr),captc(0:nr),capte(0:nr),&
+               xn0e(0:nr),xn0i(0:nr),xn0c(0:nr),capne(0:nr),capni(0:nr),capnc(0:nr),zeff(0:nr),nue0(0:nr),&
+               vpari(0:nr),vparc(0:nr),vparb(0:nr),phinc(0:nr), &
+               vparip(0:nr),vparcp(0:nr),vparbp(0:nr),phincp(0:nr),er(0:nr), &
+               upari(0:nr),dipdr(0:nr))
+
                
       allocate(psip2(0:nr), curvbz(0:nr,0:ntheta),srbr(0:nr,0:ntheta),srbz(0:nr,0:ntheta),&
                thbr(0:nr,0:ntheta),thbz(0:nr,0:ntheta),bdcrvb(0:nr,0:ntheta), &
                prsrbr(0:nr,0:ntheta),prsrbz(0:nr,0:ntheta), &
                pthsrbr(0:nr,0:ntheta),pthsrbz(0:nr,0:ntheta))
 
+      allocate(cn0s(1:5),n0smax(1:5),t0s(1:5,0:nr),xn0s(1:5,0:nr),&
+               capts(1:5,0:nr),capns(1:5,0:nr),vpars(1:5,0:nr),&
+               vparsp(1:5,0:nr),tgis(1:5))
 
 !Normalization
       e = 1.6e-19
@@ -188,11 +189,9 @@ contains
          t0e(i) = t0i(i)
          xn0e(i) = exp(-kappan*wn*a/lref*tanh((r-r0)/(wn*a)))
          xn0i(i) = xn0e(i)
-!         capni(i) = capne(i)
-!         capti(i) = 6.92/rmaj0
-!         capte(i) = capti(i)
-!         nhi(i) = 1.0
-!         nbi(i) = 1.0
+         phincp(i) = 0.
+         nue0(i) = 0.
+         zeff(i) = 0.         
       end do
       q0 = sf(nr/2)
       q0abs = abs(q0)
@@ -334,32 +333,45 @@ contains
       cn0i = cn0i/dum
       cn0c = cn0c/dum
       do i = 0,nr
-!         xn0e(i) = xn0e(i)/cn0e
+         xn0e(i) = xn0e(i)/cn0e
          xn0i(i) = xn0i(i)/cn0i
          xn0c(i) = xn0c(i)/cn0c
       end do
 
-!set kapn=0,n=1, etc.
+!assign value to xn0s...                                                                                                                                                                                                
+      xn0s(1,:) = xn0i(:)
+      xn0s(2,:) = xn0c(:)
+!      xn0s(3,:) = xn0b(:)
 
-!      t0i = 1.
-!      capne = 0.
-!      capni = 0.
-!      capti = capti*0.5
-!      do i = nr/2, nr-1
-!         t0i(i+1) = t0i(i)-capti(i)*t0i(i)*dr
-!      end do
-!      do i = nr/2,1,-1
-!         t0i(i-1) = t0i(i)+capti(i)*t0i(i)*dr
-!      end do
-!      capte = capti
-!      t0e = t0i
-!      xn0e = 1.
-!      capns(1,:) = 0.
-!      capts(1,:) = 0.
-!      t0s(1,:) = 1.
-!      xn0s(1,:) = 1.
-!      cn0e = 1.
-!      cn0s(1) = 1.
+      t0s(1,:) = t0i(:)
+      t0s(2,:) = t0c(:)
+!      t0s(3,:) = t0b(:)
+
+      tgis(1) = t0s(1,1)
+      tgis(2) = t0s(2,1)
+      tgis(3) = t0s(3,1)
+      tge = t0e(1)
+
+      capts(1,:) = capti(:)
+      capts(2,:) = captc(:)
+!      capts(3,:) = captb(:)
+
+      capns(1,:) = capni(:)
+      capns(2,:) = capnc(:)
+!      capns(3,:) = capnb(:)
+
+      cn0s(1) = cn0i
+      cn0s(2) = cn0c
+      cn0s(3) = cn0b
+
+      vpars(1,:) = 0. !vpari(:)
+      vpars(2,:) = 0. !vparc(:)
+!      vpars(3,:) = vparb(:)
+
+      vparsp(1,:) = 0. !vparip(:)
+      vparsp(2,:) = 0. !vparcp(:)
+!      vparsp(3,:) = vparbp(:)
+
 
 !compute jfn(theta)
       do j = 0,ntheta
@@ -420,23 +432,10 @@ contains
          end do
       end do
 
-
-      if(myid==0)then
-         open(52,file='xpp',status='unknown')
-         do i = 0,nr
-            write(52,111)i,sf(i),t0i(i),t0e(i),xn0i(i),xn0e(i),capti(i),capte(i),capni(i),capne(i)
-         end do
-         write(52,*)cn0i,cn0e,cn0c
-         do j = 0,ntheta
-!            write(52,112)j,radius(0,j),hght(0,j),btor(0,j)*radius(0,j),radius(nr,j),hght(nr,j),btor(nr,j)*radius(nr,j)
-         end do
-
-
-         close(52)
-      end if
- 111  format(1x,i5,2x,15(2x,f10.4))
- 112  format(2x,i5,15(2x,f10.4))
-
+      dipdr = 0.
+      bdcrvb = 0.
+      curvbz = 0.
+      psip2 = 0.
   end subroutine new_equil
 
 END MODULE gem_equil
