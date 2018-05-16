@@ -134,7 +134,7 @@ subroutine init
   read(115,*) dumchar
   read(115,*) dt,nm,nsm,xshape,yshape,zshape
   read(115,*) dumchar
-  read(115,*) iput,iget,ision,isiap,peritr,llk,mlk,onemd,izonal,ineq0,iflut
+  read(115,*) iput,iget,ision,isiap,peritr,llk,mlk,onemd,izonal,adiabatic_electron,ineq0,iflut ! jycheng
   read(115,*) dumchar
   read(115,*) nplot,xnplt,modem,nzcrt,npze,npzi,npzc,npzb
   read(115,*) dumchar
@@ -4722,7 +4722,17 @@ subroutine poisson(n,ip)
   do it = 1,iter
      call den0_phi(ip,n,it)
      if(iperi==1)call gkpsL(n,ip)
-     if(iperi==0)call gkps(n,ip)
+     if(iperi==0)then
+       if(adiabatic_electron==0)then ! jycheng
+         call gkps(n,ip)
+       elseif(adiabatic_electron==1)then
+         call gkps_adiabatic_electron(n,ip)
+       else
+         write(*,*)'wrong adiabatic_electron option'
+         exit
+       endif
+     endif
+
      if(idg.eq.1)write(*,*)'pass gkps in poisson'
      myrmsphi=0.
      rmp(it)=0.

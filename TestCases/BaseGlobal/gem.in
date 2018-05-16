@@ -16,8 +16,8 @@
 'DT      NM     nsm     xshape  yshape  zshape'
  1.0     9000    1       1.0     1.0     137.44
 
-'iput iget ision isiap   peritr llk mlk onemd izonal ineq0   iflut'
-  1    1     1     0       0     0   1    1     1      1       1
+'iput iget ision isiap   peritr llk mlk onemd izonal adiabatic_electron ineq0   iflut'
+  1    1     1     0       0     0   1    1     1            0            1       1
 
 'nplot xnplt modem nzcrt npze npzi npzc npzb'
  100   10      4    4     2    2    16   16
