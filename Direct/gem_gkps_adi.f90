@@ -349,7 +349,7 @@ subroutine gkps_adiabatic_electron(nstep,ip)
         ! the ky!=0 source term
         sl(1:imx-1,j,k)=v(1:imx-1,j,k)
         ! the ky=0 source term
-        if(myj==jft(0))sl(1:imx,j,k)=v_zonal(1:imx-1,j,k)
+        if(myj==jft(0))sl(1:imx-1,j,k)=v_zonal(1:imx-1,j,k)
         call ZGETRS('N',imx-1,1,mx(:,:,j,k),imx-1,ipiv(:,:,j,k), &
              sl(:,j,k),imx-1,INFO)
         temp3dxy(1:imx-1,myj,k)=sl(1:imx-1,j,k)
