@@ -1,8 +1,11 @@
 MODULE gem_equil
   IMPLICIT NONE
-  integer :: itube,ibase,iperi,iperidf,ibunit,icandy=1,isprime=0,ildu=0,eldu=0
+! icandy=0 sets the naieve flux-tube model, i.e. assumes the local flux surfaces are indeed given by R'_0(r0),s_kappa, s_delta, q0p, etc.
+! The field gradients dbdr(r,theta), dbdth(r, theta), and dydr(r,theta) are then all calculated accordingly.
+! icandy=1 uses the flux-tube model of Candy PPCF 2009 
+  integer :: itube,ibase,iperi,iperidf,ibunit,icandy=0,isprime=0,ildu=0,eldu=0
   real :: mimp=2,mcmp=12,chgi=1,chgc=6
-  real :: elon0=1.0,tria0=0.0,rmaj0=500.0,r0,a=180.0,selon0=0.0,&
+  real :: elon0=1.0,tria0=0.0,rmaj0=1000.0,r0,a=360.0,selon0=0.0,&
              stria0=0.0,rmaj0p=-0.0,q0p=0.006,q0=1.4, elonp0=0.,triap0=0.,erp=0.01,er0=0.,q0abs
   real :: beta,Rovera,shat0,teti,tcti,rhoia,Rovlni,Rovlti,Rovlne,Rovlte,Rovlnc,Rovltc,ncne,nuacs
   real :: gamma_E,mach
@@ -12,7 +15,7 @@ MODULE gem_equil
   real :: r0a,lxa,lymult,delra,delri,delre,delrn,rina,routa,betai, &
                tir0,xnir0,xu,frequ,vu,eru
 
-  integer :: nr=256,nr2=150,ntheta=100,idiag=0
+  integer :: nr=300,nr2=150,ntheta=100,idiag=0
   real,dimension(:,:),allocatable :: bfld,qhat,radius,gr,gth,grdgt,grcgt, &
                                         gxdgy,dydr,dbdr,dbdth,dqhdr,jacob, &
                                         yfn,hght,thflx
@@ -24,13 +27,8 @@ MODULE gem_equil
                                       vparip,vparcp,vparbp, &
                                       capti,capte,captb,captc,capni,capne,&
                                       capnb,capnc,zeff,nue0,phinc,phincp,&
-                                      er,upari,&
-                                      dldth,sinu,cosu,dudl,dzdl,bps,&
-                                      grr,grz,gtr,gtz, &
-                                      grdgl,grdgrho,gtdgl,gtdgrho, &
-                                      dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
-                                      db2dl,db2drho,dbpsdl,dipdr, &
-                                      rdtemp
+                                      er,upari,dipdr
+
 !for Miller local flux-tube
   real :: candyf0p
   real,dimension(:),allocatable :: candyd0,candyd1,candyd2,candynus,candynu1,candydr
@@ -47,7 +45,6 @@ MODULE gem_equil
 
 contains
   subroutine new_equil()
-      
       real :: pi,r,th,s,ss,c1,c2,lti,s0,s1,delsi,lte,delse,ln,deln
       parameter(c1=0.43236,c2=2.33528,lti=144.9,s1=0.5,delsi=0.6, &
                 lte=144.9,delse=0.6,deln=0.6,ln=454.5)
@@ -58,6 +55,11 @@ contains
       character(len=100) :: header,header2
 
       real :: e=1.6e-19,eps0=8.85e-12,me=0.9e-30,vte,pprime
+      real,dimension(:),allocatable :: dldth,sinu,cosu,dudl,dzdl,bps,&
+                                       grr,grz,gtr,gtz, &
+                                       grdgl,grdgrho,gtdgl,gtdgrho, &
+                                       dldr,dldt,drhdr,drhdt,dbdl,dbdrho, &
+                                       db2dl,db2drho,dbpsdl
 
       allocate(bfld(0:nr,0:ntheta),qhat(0:nr,0:ntheta),radius(0:nr,0:ntheta), &
                gr(0:nr,0:ntheta),gth(0:nr,0:ntheta),grdgt(0:nr,0:ntheta), &
@@ -75,7 +77,7 @@ contains
                capne(0:nr),capnb(0:nr),capnc(0:nr),zeff(0:nr),nue0(0:nr),&
                vpari(0:nr),vparc(0:nr),vparb(0:nr),phinc(0:nr), &
                vparip(0:nr),vparcp(0:nr),vparbp(0:nr),phincp(0:nr),er(0:nr), &
-               upari(0:nr),dipdr(0:nr),rdtemp(0:nr))
+               upari(0:nr),dipdr(0:nr))
 
       allocate(curvbz(0:nr,0:ntheta),srbr(0:nr,0:ntheta),srbz(0:nr,0:ntheta),&
                thbr(0:nr,0:ntheta),thbz(0:nr,0:ntheta), psip2(0:nr),bdcrvb(0:nr,0:ntheta),&
@@ -95,9 +97,7 @@ contains
       allocate(dbdl(0:ntheta),dbdrho(0:ntheta))
       allocate(db2dl(0:ntheta),db2drho(0:ntheta),dbpsdl(0:ntheta))
       allocate(candyd0(0:ntheta),candyd1(0:ntheta),candyd2(0:ntheta),candynus(0:ntheta),candynu1(0:ntheta),candydr(0:ntheta))
-     
-     
-      !write(*,*),'Rmaj0=',Rmaj0,'Rovera=',Rovera,'shat0=',shat0,'rmaj0p',rmaj0p
+
 ! if analytical equilibrium
       a = Rmaj0/Rovera
       r0=r0a*a
@@ -114,13 +114,13 @@ contains
       if(idiag==1)write(*,*)pi,dr,dth,nr,ntheta
 
 ! specify f(r),q(r)
+      f0p = 0. !by default
       do i = 0,nr
          r = rin+i*dr
          f(i) = rmaj0
          s = r/a
          ss = s*s
-         !sf(i) = q0+(r-r0)*q0p
-         sf(i)=0.86-0.16*s+2.52*ss
+         sf(i) = q0+(r-r0)*q0p
       end do
 
 ! specify rmaj(r)
@@ -252,8 +252,7 @@ contains
          betai = betai*bunit**2
          rhoia = rhoia*bunit
       end if
-      !t0e0 = mimp*(rhoia*a*chgi/mimp)**2
-      t0e0=1.0
+      t0e0 = mimp*(rhoia*a*chgi/mimp)**2
       t0i0 = t0e0/teti
       t0c0 = t0i0*tcti
       ne0 = 1.0 !n_u
@@ -269,18 +268,16 @@ contains
       nuacs = nuacs*sqrt(t0e0/mimp)/a
 
       do i = 0,nr
-         r = rin+i*dr
-         s=r/a
-         xn0i(i) = ni0*exp(-Rovlni*0.36*0.3*tanh((s-0.5)/0.3))
-         capni(i) = -ni0p/ni0*(1-tanh((s-0.5)/0.3)*tanh((s-0.5)/0.3))
-         xn0e(i) = ne0*exp(-Rovlne*0.36*0.3*tanh((s-0.5)/0.3))
-         capne(i) = -ne0p/ne0*(1-tanh((s-0.5)/0.3)*tanh((s-0.5)/0.3))
+         xn0i(i) = ni0
+         capni(i) = -ni0p/ni0
+         xn0e(i) = ne0
+         capne(i) = -ne0p/ne0
          xn0c(i) = nc0
          capnc(i) = -nc0p/nc0
-         t0i(i) = t0i0*exp(-Rovlti*0.36*0.3*tanh((s-0.5)/0.3))
-         capti(i) = -t0i0p/t0i0*(1-tanh((s-0.5)/0.3)*tanh((s-0.5)/0.3))
-         t0e(i) = t0e0*exp(-Rovlte*0.36*0.3*tanh((s-0.5)/0.3))
-         capte(i) = -t0e0p/t0e0*(1-tanh((s-0.5)/0.3)*tanh((s-0.5)/0.3))
+         t0i(i) = t0i0
+         capti(i) = -t0i0p/t0i0
+         t0e(i) = t0e0
+         capte(i) = -t0e0p/t0e0
          t0c(i) = t0c0
          captc(i) = -t0c0p/t0c0
          phincp(i) = 0.005*sin((r-rin)/(rout-rin)*2*pi)
@@ -315,7 +312,7 @@ contains
       end do
       dum2 = dum2*f0/(2*pi)
 
-!compute term3 in (21) ... WWan
+!compute term3 in (21)
       pprime =  (t0i0p*ni0+t0i0*ni0p + t0e0p*ne0+t0e0*ne0p)/psip(nr2)*isprime
       dum3 = 0.
       do j = 0,ntheta-1
@@ -344,8 +341,10 @@ contains
       candyd1(ntheta/2) = 0
       candyd2(ntheta/2) = 0
       do j = ntheta/2+1,ntheta
-         candyd0(j) = candyd0(j-1)+dth*dldth(j)/(radius(nr2,j)**2*bps(j))*(dudl(j)/(radius(nr2,j)*bps(j))-sinu(j)/(radius(nr2,j)**2*bps(j)))*f0 &
-                                +dth*dldth(j-1)/(radius(nr2,j-1)**2*bps(j-1))*(dudl(j-1)/(radius(nr2,j-1)*bps(j-1))-sinu(j-1)/(radius(nr2,j-1)**2*bps(j-1)))*f0
+         candyd0(j) = candyd0(j-1)+dth*dldth(j)/(radius(nr2,j)**2*bps(j))*&
+              (dudl(j)/(radius(nr2,j)*bps(j))-sinu(j)/(radius(nr2,j)**2*bps(j)))*f0 &
+              +dth*dldth(j-1)/(radius(nr2,j-1)**2*bps(j-1))*(dudl(j-1)/(radius(nr2,j-1)*&
+              bps(j-1))-sinu(j-1)/(radius(nr2,j-1)**2*bps(j-1)))*f0
          candyd1(j) = candyd1(j-1)+0.5*dth*dldth(j)/(radius(nr2,j)**2*bps(j))*bfld(nr2,j)**2/(bps(j)**2*f0) &
                                 +0.5*dth*dldth(j-1)/(radius(nr2,j-1)**2*bps(j-1))*bfld(nr2,j-1)**2/(bps(j-1)**2*f0)
          candyd2(j) = candyd2(j-1)+0.5*dth*dldth(j)/(radius(nr2,j)**2*bps(j))*betai*f0/bps(j)**2 &
@@ -355,7 +354,8 @@ contains
          candyd2(ntheta-j) = -candyd2(j)
       end do
 !compute f0p according Eq.(86)
-      candyf0p = (pi*2*q0p/psip(nr2)- ((candyd0(ntheta)-candyd0(0))+(candyd2(ntheta)-candyd2(0))*pprime))/((candyd1(ntheta)-candyd1(0))*f0)*psip(nr2)
+      candyf0p = (pi*2*q0p/psip(nr2)- ((candyd0(ntheta)-candyd0(0))+&
+           (candyd2(ntheta)-candyd2(0))*pprime))/((candyd1(ntheta)-candyd1(0))*f0)*psip(nr2)
       f0p = candyf0p
       do j = 0,ntheta
          candynu1(j) = radius(nr2,j)*bps(j)*(candyd0(j)+candyd1(j)*f0*f0p/psip(nr2)+candyd2(j)*pprime)
@@ -475,8 +475,8 @@ contains
          end do
       end do
 
-    !compute the flux coordinate theta                                                                                                                                                        \
-                                                                                                                                                                                               
+    !compute the flux coordinate theta
+
     do i = 0,nr
        thflx(i,ntheta/2) = 0.
        dum = 0.
@@ -695,8 +695,6 @@ contains
       bdcrvb=0
       curvbz=0
       psip2=0
-      
-      rdtemp=0
 
   end subroutine new_equil
 
