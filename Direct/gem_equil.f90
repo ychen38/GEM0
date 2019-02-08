@@ -341,8 +341,10 @@ contains
       candyd1(ntheta/2) = 0
       candyd2(ntheta/2) = 0
       do j = ntheta/2+1,ntheta
-         candyd0(j) = candyd0(j-1)+dth*dldth(j)/(radius(nr2,j)**2*bps(j))*(dudl(j)/(radius(nr2,j)*bps(j))-sinu(j)/(radius(nr2,j)**2*bps(j)))*f0 &
-                                +dth*dldth(j-1)/(radius(nr2,j-1)**2*bps(j-1))*(dudl(j-1)/(radius(nr2,j-1)*bps(j-1))-sinu(j-1)/(radius(nr2,j-1)**2*bps(j-1)))*f0
+         candyd0(j) = candyd0(j-1)+dth*dldth(j)/(radius(nr2,j)**2*bps(j))*&
+              (dudl(j)/(radius(nr2,j)*bps(j))-sinu(j)/(radius(nr2,j)**2*bps(j)))*f0 &
+              +dth*dldth(j-1)/(radius(nr2,j-1)**2*bps(j-1))*(dudl(j-1)/(radius(nr2,j-1)*&
+              bps(j-1))-sinu(j-1)/(radius(nr2,j-1)**2*bps(j-1)))*f0
          candyd1(j) = candyd1(j-1)+0.5*dth*dldth(j)/(radius(nr2,j)**2*bps(j))*bfld(nr2,j)**2/(bps(j)**2*f0) &
                                 +0.5*dth*dldth(j-1)/(radius(nr2,j-1)**2*bps(j-1))*bfld(nr2,j-1)**2/(bps(j-1)**2*f0)
          candyd2(j) = candyd2(j-1)+0.5*dth*dldth(j)/(radius(nr2,j)**2*bps(j))*betai*f0/bps(j)**2 &
@@ -352,7 +354,8 @@ contains
          candyd2(ntheta-j) = -candyd2(j)
       end do
 !compute f0p according Eq.(86)
-      candyf0p = (pi*2*q0p/psip(nr2)- ((candyd0(ntheta)-candyd0(0))+(candyd2(ntheta)-candyd2(0))*pprime))/((candyd1(ntheta)-candyd1(0))*f0)*psip(nr2)
+      candyf0p = (pi*2*q0p/psip(nr2)- ((candyd0(ntheta)-candyd0(0))+&
+           (candyd2(ntheta)-candyd2(0))*pprime))/((candyd1(ntheta)-candyd1(0))*f0)*psip(nr2)
       f0p = candyf0p
       do j = 0,ntheta
          candynu1(j) = radius(nr2,j)*bps(j)*(candyd0(j)+candyd1(j)*f0*f0p/psip(nr2)+candyd2(j)*pprime)
