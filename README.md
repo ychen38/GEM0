@@ -21,3 +21,6 @@ Old-style "character*70" should be changed to "character(len=70)"
 7, Try to convert all .f files to .f90 with free-format syntax
 
 8, All declared variables should be used. Remove variables not needed anymore. 
+
+9, Always use "implicit none"
+
