@@ -5,7 +5,7 @@ MODULE gem_pputil
 !  use fft_wrapper
   IMPLICIT NONE
   PRIVATE
-  PUBLIC :: ppinit, ppexit, init_pmove, end_pmove, pmove, guard
+  PUBLIC :: ppinit_mpi,ppinit_decomp,ppexit, init_pmove,end_pmove,pmove,guard
   PUBLIC :: ppsum, ppmax, ppmin
   PUBLIC :: pptransp, ppcfft2
   PUBLIC :: timera, disp
@@ -342,35 +342,40 @@ CONTAINS
 !
   END SUBROUTINE disp2r
 !======================================================================
-!
-      SUBROUTINE ppinit(idproc,nproc,ntube,com1,com2)
-!
-     use mpi
-     INTEGER, INTENT(IN) :: ntube
-     INTEGER, INTENT(OUT) :: nproc
-     INTEGER, INTENT(OUT) :: idproc,com1,com2
-     INTEGER :: ierr,npp
-!
-     CALL MPI_INIT(ierr)
-     CALL MPI_COMM_SIZE(MPI_COMM_WORLD, npp, ierr)
-     CALL MPI_COMM_RANK(MPI_COMM_WORLD, me, ierr)
-     nproc = npp
-     IDPROC = me
-! 
-     GCLR=INT(me/ntube)
-     TCLR=MOD(me,ntube)
-!
-     CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,GCLR,&
-           &     TCLR,GRID_COMM,ierr)
-     CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,TCLR,&
-         &     GCLR,TUBE_COMM,ierr)
-!
-     com1=TUBE_COMM
-     com2=GRID_COMM
-     nvp=npp/ntube
-!
-     END SUBROUTINE ppinit
-!
+!mpi initialization
+subroutine ppinit_mpi(idproc,nproc)
+  use mpi
+  integer, intent(out) :: idproc,nproc
+  integer :: ierr,npp
+
+  call mpi_init(ierr)
+  !set the size of the MPI in the mpi_comm_world MPI space
+  call mpi_comm_size(mpi_comm_world,npp,ierr)
+  !set the rank of the MPI in the mpi_comm_world MPI space
+  call mpi_comm_rank(mpi_comm_world,me,ierr)
+  nproc=npp
+  idproc=me 
+end subroutine ppinit_mpi
+!particle decomp
+subroutine ppinit_decomp(mype,nproc,ntube,com1,com2)
+  use mpi
+  integer, intent(in) :: mype,nproc,ntube
+  integer, intent(out) :: com1,com2
+  integer :: ierr
+
+  !the rank of the particle decomposition
+  gclr=int(mype/ntube)
+  !the rank in the particle decomposition
+  tclr=mod(mype,ntube)
+
+  !set the particle MPI space
+  call mpi_comm_split(mpi_comm_world,gclr,tclr,grid_comm,ierr)
+  call mpi_comm_split(mpi_comm_world,tclr,gclr,tube_comm,ierr)
+
+  com1=tube_comm
+  com2=grid_comm
+  nvp=nproc/ntube
+end subroutine ppinit_decomp
 !===========================================================================
   SUBROUTINE ppexit
     INTEGER :: ierr

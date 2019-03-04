@@ -20,7 +20,7 @@ module gem_com
   END INTERFACE
 
   integer :: imx,jmx,kmx,mmx,mmxe,nmx,nsmx,nsubd=8,&
-       modemx,ntube=4,nxpp,ngdx=5,nb=6, &
+       modemx,ntube,nxpp,ngdx=5,nb=6, &
        negrd=8,nlgrd=8
 
   character(len=70) outname
@@ -43,6 +43,9 @@ module gem_com
   integer :: mme,mmb
   REAL, dimension(:,:),allocatable :: rwx,rwy
   INTEGER,dimension(:),allocatable :: mm,tmm,lr
+  integer :: micell,mecell !jycheng
+  integer :: nonlin1,nonlin2 !jycheng
+  real :: mims3,q3 !jycheng
   REAL,dimension(:),allocatable :: tets,mims,q
   REAL,dimension(:),allocatable :: kapn, kapt
   INTEGER :: timestep,im,jm,km,mykm,iseed,nrst,nfreq,isft,mynf,ifskp,iphbf,iapbf,idpbf
