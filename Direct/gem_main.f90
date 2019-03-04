@@ -140,7 +140,7 @@ subroutine init
   timestep=0
   !the initial timestep 
   tcurr=0.
-  open(unit=115,file='gem_new_1.in',status='old',action='read')
+  open(unit=115,file='gem.in',status='old',action='read')
   read(115,nml=primary_parameters)
   read(115,nml=control_parameters)
   read(115,nml=diagnosis_parameters)
