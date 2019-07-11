@@ -1,47 +1,158 @@
-'itube iperi    iperidf   ibunit   mimp   mcmp   chgi chgc'
-  1      1        1         0       2      2      1     1
-
-'R/a   kappa   s_kappa delta  s_delta   shift   q0       shat0  teti    tcti    rhoia'
-2.778     1.      0.0     0.       0.   -0.0    1.4      0.78   1.0     1.0     0.00393
-
-'R/Lni    R/Lti    R/Lne    R/Lte    R/Lnc    R/Ltc    nc/ne' 
- 2.2      6.9      2.2      6.9      12.       0.      1.0e-08
- 
-'IMX   JMX   KMX    MMX     mmxe    nmx    nsmx modemx NTUBE ixs_sec ipg isphi'
- 32     32    64    100000   800000  100000  3     4      4     0     100 1 
-
-'LXA  lymult  delra  delri delre delrn  nrst  eprs nlow  jcnt'
- 0.06   30     0.05    0.0   0.0   0.0   1000   0.0  1     3
-
-'DT      NM     nsm     xshape  yshape  zshape'
- 3.     5000     1       1.0     1.0     137.44
-
-'iput iget ision isiap   peritr llk mlk onemd izonal adiabatic_electron ineq0   iflut'
-  1    0     1     0       0     0   1    1     1             1           1       1
-
-'nplot XNPLT modem nzcrt npze npzi npzc npzb'
- 100   10      4    4     2    2    16   16
-
-'isft mynf frmax ifskp  iphbf  iapbf  idpbf'
-  0   10   0.002 10       0      0      0
-
-'cut    amp0.01 tor ishift fradi kxcut KYCUT   bcut'
- 1.0    1.e-4    1.   0     0.0   1.5    1.0   3000.
-
-'r0a   width   vpp   vt0   yd0'
- 0.5    1.e7   0.000  0.   0.00
-
-'c4   ifluid   isg   amie  rneu  rneui vexbsw vparsw  mach  gamma_E.a/cs'
-2.0     1      1.0   1800. 0e-3  0e-6    0.     0.      0.     0.066
- 
-'betae nonlin1 nonlin2 nonline ipara   vwidth  vwidthe vcut    isuni   idg'
- 1.e-2   0       0       0      0        8.      8.     15.      0       0
-
-'***************species info************************************'
-
-'mm1            mm2             mbeam   qbeam  lr'
-1048576        1048576          2.      1.    4
-
-'iflr iorb'
-   1   1
-
+&primary_parameters
+itube=0       !0: global simulation; 1: flux tube 
+mimp=2        !mass ratio of ions with respect to to protons
+mcmp=2        !mass ratio of impurities with respect to to protons
+chgi=1        !charge of ions with respect to to electron charge
+chgc=1        !charge of impurity ions with respect to electron charge
+imx=512      !number of grid points along x direction
+jmx=128      !number of grid points along y direction
+kmx=64        !number of grid points along z direction
+mmx=100000    !maximum number of marker particles 
+mmxe=800000   !
+nmx=50000    !maximum number of time steps
+nsmx=3        !maximum number if impurity ions
+ntube=4       !the z direction is divided in to km grids 
+              !these grids are used for the primary domain decomposition. 
+              !particles in each z grid are then distributed among ntube processors so that, 
+              !total number of processors=kmx*ntube.  
+              !also, the calculation of jm Fourier components of potentials is equally distributed 
+              !among the ntube processors. Therefore, jmx/ntube must be an integer 
+lxa=0.4       !radial box size, for fixed BC in linear runs
+              !radial box size for nonlinear simulation
+              !for periodic boundary condition linear runs, lxa is defined in equilf90 as 1/nq'
+lymult=10     !number of wedges the whole tokamak is partitioned in total Number of toroidal mode number 
+              !in linear runs. delta n in nonlinear runs
+jcnt=11 !
+dt=1.0   !times steps in units of omega_u=eB/mp
+nm=5000       !total no of times steps
+nsm=1         !number of ion species
+amp=1.e-3     !amplitude of initial weight defined in loading (loadi and ldel)
+              !always set 0.01 in gem.in
+              !automatically set to 0 when iget=1, that is restartin
+fradi=0.0     !adiabatic fraction of electrons; set equal to isg the split weight factor
+r0a=0.5       !r0/a; center of the radial domain
+vpp=0.000     !
+vt0=0.
+yd0=0.00
+ifluid=1      !0: no kinetic electron; 1: invokes kinetic electron
+isg=1.0       !split weigh factor, almost always 0.1
+amie=1800.  !proton to electron mass ratio
+rneui=0e-6    !ion electron(?) collision frequency
+betai=1.e-3   !electron beta
+nonlin1=1     !switch for ion nonlinear terms. 0: linear; 1: nonlinear
+nonlin2=0     !
+nonline=1     !switch for electron nonlinear terms. 0: linear; 1: nonlinear
+ipara=0       !switch to take in to parallel non-linearity. 0: exclude; 1: include
+vwidth=8.     !used for uniform loading
+vwidthe=8.    !used for uniform loading
+vcut=15.      !always 4
+              !used to reset electron weight when v_||/vthe>vcut, wght=0 
+              !used in subroutines grid1, jie, jpar0, and in setw
+micell=8     !total no of marker particles of ions
+mecell=16     !total no of marker particles of electrons
+mims3=2.      !mass of beam
+q3=1.         !charge of beam ions=1, N
+/
+&control_parameters
+iperi=0       !1: periodic boundary condition for potentials
+              !0: fixed boundary condition
+iperidf=0     !1: periodic boundary condition for particles
+              !0: fixed boundary condition for particles
+ibunit=0      !1: convert the GYRO rhostar and beta_e to gem rhostar and beta_e
+              !0: no need to convert 
+modemx=4      !maximum number of modes
+delra=0.05
+delri=0.0
+delre=0.0
+delrn=0.0
+nlow=1        !determines the lowest wave number in the NONLINEAR simulation in multiples of lymult
+              !for example, if nlow=1, lowest wave number in the simulation is lymult x nlow=lymult
+xshape=1.0    !gaussian filter used in nonlinear simulation along x
+yshape=1.0    !gaussian filter used in nonlinear simulation along y
+zshape=137.44 !gaussian filter used in nonlinear simulation along z
+iput=1        !save files for restart, iput=1 always
+iget=1        !to retrieve saved stuff during a restart. 
+              !0: the first run
+              !1: all restarts
+ision=1       !always 1, calculates ion contributions to current and density
+isiap=0       !
+peritr=0      !
+llk=0         !always set 0, used only in yveck, picks the i=0 Fourier component in 
+mlk=1         !1 always to pick the m=1 Fourier component in y in the case of onemd=1 (linear runs)
+onemd=0       !defines whether to use one mode or multimode runs. 
+              !for linear runs, onemd=1 to pick single mode.
+izonal=1      !0: remove the zonal component from \phi and d\phi/dt
+              !1: retain the zonal component in \phi and d\phi/dt
+adiabatic_electron=0    !adiabatic electron options. 0: non; 1: adiabatic
+ineq0=1       !
+iflut=1       !1 always to keep the magnetic flutter component v_||delB/B in x and y component of velocity/drift 
+nzcrt=4       !the kx components to be removed from n=0 component. All i<nzcrt components are removed
+npze=2        !used to define critical value of electron toroidal canonical momentum pzcrite
+npzi=2        !used to define critical value of main ion toroidal canonical momentum pzcrite
+npzc=16       !used to define critical value of impurity ion toroidal canonical momentum pzcrite
+npzb=16       !used to define critical value of beam ion toroidal canonical momentum pzcrite
+iphbf=0       !1, use blending function for phi
+iapbf=0       !1, use blending function for A_{||}
+idpbf=0       !1, use blending flunction for d\phi/dt; 0 always  
+cut=1.0     !used in restart, redefines weight as weight/cut
+              !however in initialize, cut redefined if (cut.eq.0.) cut=1
+              !always 1 in gem.in
+kxcut=1.5     !cut off value for kx
+kycut=1.0     !cut off value for ky
+bcut=3000.    !cut off value for aruguments of Bessel function
+              !always set to 3000 in gem.in
+c4=2.0        !always 2 defined in gem.in, the power in the Gaussian filter that is epx(-b2^c4)
+vexbsw=0.     !switch for equilibrium EXB shear 
+              !1: takes in to account the effect of EXB shear
+              !with EXB shear, the boundary condition is always fixed
+              !0: ignores EXB shear. 
+vparsw=0.     !switch for equilibrium parallel flow
+mach=0.       !value with respect to ion sound speed, used to define flow
+gamma_E=0.066 !EXB shearing rate, given in cs/a
+isuni=0       !0 always. Used earlier for uniform loading
+lr1=4         !is the number of points for gyro averaging. 4 always in gem.in
+iflr=1        !always 1. To include the finite Larmor radius effect of the ions; used in ppush, cpush, grid1, jie
+iorb=1        !always 1. To include finite orbit width term (??). Multiplied to the magnetic drift terms in               !ppush an cpush
+/
+&diagnosis_parameters
+icrs_sec=0    !used in global codes to plot poloidal cross-section .
+              !1: when to get the plot; 0: otherwise.
+ipg=100       !which snapshot to get
+isphi=1       !which potential to plot. 0 for A_||; 1 for phi
+nplot=100     !the interval in time steps, at which the data are stored for contour plots and other post-processing stuff
+xnplt=10       !the interval in time steps at which spec and dchi called to calculate potentials, weight, fluxes and other stuff
+modem=4       !used in outd.f for hist.out. The maximum no of mode history plots
+isft=0        !if isft=1, code calculates the real frequency 
+mynf=10       !nfreq=kmx*mynf no of points in in Fourier transform
+frmax=0.005   !maximum range of frequency
+ifskp=10      !used in yveck1 and ftcamp,  nsize=nm/ifskp
+idg=0         !0 always; 1, writes various component to the output file run.out
+/
+&fluxtube
+Rovera=2.778  !aspect ratio, ratio of major radius to minor radius
+elon0=1.      !elongation, stretch up-down
+selon0=0.0    !radial variation of elongation
+tria0=0.      !triangularity: stretch radially outward
+stria0=0.     !radial variation of triangularity
+rmaj0p=-0.0   !measure of Shafranov shift
+q0=1.4        !safety factor 
+shat0=0.78     !shear
+teti=1.0      !ratio of electron temperature to ion temperature
+tcti=1.0      !ratio of impurity temperature to ion temperature
+rhoia=0.00393 !rhos/a
+Rovlni=2.2   !ion density gradient scale length normalized to major radius
+Rovlti=6.9   !ion temperature gradient scale length normalized to major radius
+Rovlne=2.2   !electron density gradient scale length normalized to major radius
+Rovlte=6.9   !electron temperature gradient scale length normalized to major radius
+Rovlnc=12.     !impurity density gradient scale length normalized to major radius
+Rovltc=0.     !impurity temperature gradient scale length normalized to major radius
+ncne=1.0e-8   !measure of impurity concentration, ratio of impurity to electron density
+nuacs=0e-3    !electron ion collision frequency???
+/
+&others
+nrst=1000     !sets the interval in time steps after which the coarse graining is to be invoked  
+eprs=0.0      !the parameter for coarse graining
+tor=1.        !always set 1 in gem.in.
+ishift=0      !
+width=1.e7    !
+/

@@ -2,12 +2,12 @@ SRCS =	gem_com.f90 gem_equil.f90 gem_main.f90 gem_outd.f90 gem_fcnt.f90 gem_fft_
 
 OBJS =	gem_com.o gem_equil.o gem_main.o gem_outd.o gem_fcnt.o gem_fft_wrapper.o gem_gkps_adi.o
 
-LIBS = $(DFFTPACK)
+LIBS = ../dfftpack_cray/libdfftpack.a
 PLIB = gem_pputil.o
 
 F90 = ftn
-#OPT = -FR -r8 -heap-arrays -O2 -g -traceback -check bounds
-OPT = -FR -r8 -O3
+#OPT = -FR -r8 -heap-arrays -O2 -g -traceback -check bounds -qopenmp
+OPT = -f free -s real64 -O3
 LDFLAGS = 
 
 #all : gem

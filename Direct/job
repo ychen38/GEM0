@@ -2,11 +2,17 @@
 
 #SBATCH -A mp118
 #SBATCH -q debug
-#SBATCH -N 8
+#SBATCH -N 32
+#SBATCH --ntasks=256
+#SBATCH --cpus-per-task=8
 #SBATCH -C haswell
 #SBATCH -t 0:30:00
-#SBATCH -J direct
+#SBATCH -J amp3
+
+export OMP_PROC_BIND=spread
+export OMP_PLACES=threads
+export OMP_NUM_THREADS=8
 
 cd $SLURM_SUBMIT_DIR
 
-srun -n 256 ./gem_main >& run.out
+srun --cpu-bind=cores ./gem_main >& run.out

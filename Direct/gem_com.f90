@@ -155,6 +155,9 @@ module gem_com
   complex,dimension(:,:,:,:),allocatable :: pol,pmtrx,pmtrxi
   complex,dimension(:,:),allocatable :: pfac
 
+  complex,dimension(:,:,:,:),allocatable :: mxg,mxa,mxd
+  integer,dimension(:,:,:,:),allocatable :: ipivg,ipiva,ipivd
+
   !      MPI variables
   !  include '/usr/include/mpif.h'
 
@@ -276,6 +279,8 @@ contains
          pmtrx(0:imx-1,0:jmx-1,1:nb,1:nb), &
          pmtrxi(0:imx-1,0:jmx-1,1:nb,1:nb))
 
+    allocate(mxg(imx-1,imx-1,0:jcnt-1,0:1),mxa(imx-1,imx-1,0:jcnt-1,0:1),mxd(imx-1,imx-1,0:jcnt-1,0:1), &
+             ipivg(imx-1,imx-1,0:jcnt-1,0:1),ipiva(imx-1,imx-1,0:jcnt-1,0:1),ipivd(imx-1,imx-1,0:jcnt-1,0:1))
   end subroutine new_gem_com
 
 end module gem_com
